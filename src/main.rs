@@ -1,104 +1,110 @@
-use chrono::{DateTime, NaiveDateTime, Utc, TimeZone};
+use chrono::{DateTime, TimeZone, NaiveDateTime, Local};
 use std::fs::OpenOptions;
 use std::io::{BufRead, BufReader, Write};
-
 
 fn main() {
     let file_path = "tasks.txt".to_string(); // Ruta del archivo de texto
 
     let mut task_list = TaskList::new(file_path.clone());
 
-    // Cargar tareas existentes desde el archivo
+    
     task_list.load_tasks_from_file();
 
     loop {
-        println!("----- Task Manager -----");
-        println!("1. Register User");
-        println!("2. Add Task");
-        println!("3. Print Tasks");
-        println!("4. Complete Task");
-        println!("5. Exit");
         println!("------------------------");
-        println!("Enter your choice:");
+        println!("📕📕📕 Mis Tareas📕📕📕");
+        println!("1️. Resgistrar usuario");
+        println!("2️. Añadir Tarea");
+        println!("3️. Mostrar Tareas");
+        println!("4️. Completar Tarea");
+        println!("5️. Limpiar Tareas");
+        println!("6️. Exit");
+        println!("------------------------");
+        println!("Ingrese la opcion: ");
 
         let mut input = String::new();
-        std::io::stdin().read_line(&mut input).expect("Failed to read input");
+        std::io::stdin().read_line(&mut input).expect("Error de lectura");
 
         match input.trim().parse::<u32>() {
             Ok(choice) => {
                 match choice {
                     1 => {
-                        println!("Enter your name:");
+                        println!("Ingrese su nombre: ");
                         let mut name = String::new();
                         std::io::stdin()
                             .read_line(&mut name)
-                            .expect("Failed to read input");
+                            .expect("Error de lectura");
 
-                        println!("Enter your email:");
+                        println!("Ingrese su email: ");
                         let mut email = String::new();
                         std::io::stdin()
                             .read_line(&mut email)
-                            .expect("Failed to read input");
+                            .expect("Error de lectura");
 
                         task_list.register_user(name.trim().to_string(), email.trim().to_string());
-                        println!("User registered successfully!");
+                        println!("Usuario registrado exitosamente 👍:)");
                     }
                     2 => {
                         if task_list.user.is_none() {
-                            println!("Please register a user first!");
+                            println!("Registrar usuario");
                             continue;
                         }
 
-                        println!("Enter task description:");
+                        println!("Ingrese la descripcion de la tarea");
                         let mut description = String::new();
                         std::io::stdin()
                             .read_line(&mut description)
-                            .expect("Failed to read input");
+                            .expect("Error de lectura");
 
-                        let date_time = Utc::now(); // Puedes modificar esto según tus necesidades
+                         
 
-                        task_list.add_task(description.trim().to_string(), date_time);
-                    }
+                        task_list.add_task(description.trim().to_string());
                     
+                    }
                     3 => {
                         task_list.print_tasks();
                     }
                     4 => {
-                        println!("Enter task ID to mark as completed:");
-                        let mut input_id = String::new();
+                        println!("Ingrese la ID de la Tarea");
+                        let mut task_id_input = String::new();
                         std::io::stdin()
-                            .read_line(&mut input_id)
-                            .expect("Failed to read input");
+                            .read_line(&mut task_id_input)
+                            .expect("Error de lectura");
 
-                        match input_id.trim().parse::<u32>() {
-                            Ok(task_id) => {
-                                task_list.complete_task(task_id).unwrap_or_else(|err| {
-                                    println!("Error: {}", err);
-                                });
-                            }
+                        let task_id = match task_id_input.trim().parse::<u32>() {
+                            Ok(id) => id,
                             Err(_) => {
-                                println!("Invalid task ID");
+                                println!("ID invalida. Por favor ingrese nuevamente.");
+                                continue;
                             }
+                        };
+
+                        match task_list.complete_task(task_id) {
+                            Ok(_) => println!("Tarea completada 👌👌👌."),
+                            Err(err) => println!("Error: {}", err),
                         }
                     }
 
                     5 => {
+                        task_list.clear_tasks();
+                    }
+                    6 => {
                         task_list.save_tasks_to_file();
-                        println!("Adios :)");
+                        println!("Adios, vuelva pronto 👋👋👋");
                         break;
                     }
-                    
                     _ => {
-                        println!("Invalid choice");
+                        println!("Opcion incorrecta, ingrese una opcion valida.");
                     }
                 }
             }
             Err(_) => {
-                println!("Invalid choice");
+                println!("Opcion incorrecta, ingrese una opcion valida.");
             }
         }
     }
 }
+
 
 
 struct User {
@@ -110,7 +116,7 @@ struct Task {
     id: u32,
     description: String,
     completed: bool,
-    date_time: DateTime<Utc>,
+    date_time: DateTime<Local>,
 }
 
 struct TaskList {
@@ -133,16 +139,17 @@ impl TaskList {
         self.user = Some(user);
     }
 
-    fn add_task(&mut self, description: String, date_time: DateTime<Utc>) {
-        let id = self.tasks.len() as u32 + 1;
+
+    fn add_task(&mut self, description: String) {
+        let id = (self.tasks.len() + 1) as u32;
         let task = Task {
             id,
-            description: description.clone(),
+            description,
             completed: false,
-            date_time,
+            date_time: Local::now(),
         };
         self.tasks.push(task);
-        self.save_tasks_to_file();
+        println!("Task added successfully!");
     }
 
     fn complete_task(&mut self, task_id: u32) -> Result<(), String> {
@@ -168,8 +175,8 @@ impl TaskList {
                 if task_parts.len() == 4 {
                     if let (Ok(id), Ok(completed)) = (task_parts[0].parse::<u32>(), task_parts[3].parse::<bool>()) {
                         let date_time = match NaiveDateTime::parse_from_str(task_parts[2], "%Y-%m-%dT%H:%M:%S%.f") {
-                            Ok(parsed) => Utc.from_local_datetime(&parsed).single().unwrap_or_else(|| Utc::now()),
-                            Err(_) => Utc::now(),
+                            Ok(parsed) => Local.from_local_datetime(&parsed).single().unwrap_or_else(|| Local::now()),
+                            Err(_) => Local::now(),
                         };
 
                         let task = Task {
@@ -184,7 +191,6 @@ impl TaskList {
             }
         }
     }
-
     fn save_tasks_to_file(&self) {
         let mut file = OpenOptions::new()
             .write(true)
@@ -218,5 +224,10 @@ impl TaskList {
             }
             println!("----------------------");
         }
+    }
+
+    fn clear_tasks(&mut self) {
+        self.tasks.clear();
+        println!("All tasks have been cleared.");
     }
 }
