@@ -11,15 +11,15 @@ fn main() {
     task_list.load_tasks_from_file();
 
     loop {
-        println!("------------------------");
-        println!("📕📕📕 Mis Tareas📕📕📕");
+        println!("---------------------------------------------");
+        println!("📕📕📕 Gestor de Tareas📕📕📕");
         println!("1️. Resgistrar usuario");
         println!("2️. Añadir Tarea");
         println!("3️. Mostrar Tareas");
         println!("4️. Completar Tarea");
         println!("5️. Limpiar Tareas");
         println!("6️. Exit");
-        println!("------------------------");
+        println!("---------------------------------------------");
         println!("Ingrese la opcion: ");
 
         let mut input = String::new();
@@ -212,15 +212,15 @@ impl TaskList {
     }
 
     fn print_tasks(&self) {
-        println!("Tasks:");
+        println!("Mis Tareas:");
         for task in &self.tasks {
             println!("ID: {}", task.id);
-            println!("Description: {}", task.description);
-            println!("Completed: {}", task.completed);
-            println!("Date and Time: {}", task.date_time.to_rfc3339());
+            println!("Descripcion: {}", task.description);
+            println!("Completada: {}", task.completed);
+            println!("Fecha y hora: {}", task.date_time.to_rfc3339());
             if let Some(user) = &self.user {
-                println!("User Name: {}", user.name);
-                println!("User Email: {}", user.email);
+                println!("Nombre usuario: {}", user.name);
+                println!("email: {}", user.email);
             }
             println!("----------------------");
         }
