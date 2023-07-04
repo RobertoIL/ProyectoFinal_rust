@@ -3,7 +3,7 @@ use std::fs::OpenOptions;
 use std::io::{BufRead, BufReader, Write};
 
 fn main() {
-    let file_path = "tasks.txt".to_string(); // Ruta del archivo de texto
+    let file_path = "tareas.txt".to_string(); // Ruta del archivo de texto
 
     let mut task_list = TaskList::new(file_path.clone());
 
@@ -13,7 +13,7 @@ fn main() {
     loop {
         println!("---------------------------------------------");
         println!("📕📕📕 Gestor de Tareas📕📕📕");
-        println!("1️. Resgistrar usuario");
+        println!("1️. Registrar usuario");
         println!("2️. Añadir Tarea");
         println!("3️. Mostrar Tareas");
         println!("4️. Completar Tarea");
@@ -228,6 +228,6 @@ impl TaskList {
 
     fn clear_tasks(&mut self) {
         self.tasks.clear();
-        println!("All tasks have been cleared.");
+        println!("Todas las tareas han sido eliminadas.");
     }
 }
