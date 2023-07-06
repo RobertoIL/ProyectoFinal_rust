@@ -149,7 +149,7 @@ impl TaskList {
             date_time: Local::now(),
         };
         self.tasks.push(task);
-        println!("Task added successfully!");
+        println!("Tarea añadidad correctamente!");
     }
 
     fn complete_task(&mut self, task_id: u32) -> Result<(), String> {
@@ -158,7 +158,7 @@ impl TaskList {
             self.save_tasks_to_file();
             Ok(())
         } else {
-            Err("Task not found".to_string())
+            Err("Tarea no encontrada".to_string())
         }
     }
 
