@@ -5,10 +5,10 @@ use std::io::{BufRead, BufReader, Write};
 fn main() {
     let file_path = "tareas.txt".to_string(); // Ruta del archivo de texto
 
-    let mut task_list = TaskList::new(file_path.clone());
+    let mut lisa_tareas = ListaTarea::new(file_path.clone());
 
     
-    task_list.load_tasks_from_file();
+    lisa_tareas.cargar_tareas_txt();
 
     loop {
         println!("---------------------------------------------");
@@ -41,11 +41,11 @@ fn main() {
                             .read_line(&mut email)
                             .expect("Error de lectura");
 
-                        task_list.register_user(name.trim().to_string(), email.trim().to_string());
+                        lisa_tareas.registrar_usuario(name.trim().to_string(), email.trim().to_string());
                         println!("Usuario registrado exitosamente 👍:)");
                     }
                     2 => {
-                        if task_list.user.is_none() {
+                        if lisa_tareas.usuario.is_none() {
                             println!("Registrar usuario");
                             continue;
                         }
@@ -58,11 +58,11 @@ fn main() {
 
                          
 
-                        task_list.add_task(description.trim().to_string());
+                        lisa_tareas.añadir_tarea(description.trim().to_string());
                     
                     }
                     3 => {
-                        task_list.print_tasks();
+                        lisa_tareas.mostrar_tareas();
                     }
                     4 => {
                         println!("Ingrese la ID de la Tarea");
@@ -79,17 +79,17 @@ fn main() {
                             }
                         };
 
-                        match task_list.complete_task(task_id) {
+                        match lisa_tareas.completar_tarea(task_id) {
                             Ok(_) => println!("Tarea completada 👌👌👌."),
                             Err(err) => println!("Error: {}", err),
                         }
                     }
 
                     5 => {
-                        task_list.clear_tasks();
+                        lisa_tareas.borrar_tareas();
                     }
                     6 => {
-                        task_list.save_tasks_to_file();
+                        lisa_tareas.guardar_tareas_txt();
                         println!("Adios, vuelva pronto 👋👋👋");
                         break;
                     }
@@ -107,62 +107,63 @@ fn main() {
 
 
 
-struct User {
-    name: String,
+struct Usuario {
+    nombre: String,
     email: String,
 }
 
-struct Task {
+
+struct Tarea {
     id: u32,
-    description: String,
-    completed: bool,
+    descripcion: String,
+    completada: bool,
     date_time: DateTime<Local>,
 }
 
-struct TaskList {
-    user: Option<User>,
-    tasks: Vec<Task>,
+struct ListaTarea {
+    usuario: Option<Usuario>,
+    tareas: Vec<Tarea>,
     file_path: String,
 }
 
-impl TaskList {
-    fn new(file_path: String) -> TaskList {
-        TaskList {
-            user: None,
-            tasks: Vec::new(),
+impl ListaTarea {
+    fn new(file_path: String) -> ListaTarea {
+        ListaTarea {
+            usuario: None,
+            tareas: Vec::new(),
             file_path,
         }
     }
 
-    fn register_user(&mut self, name: String, email: String) {
-        let user = User { name, email };
-        self.user = Some(user);
+    fn registrar_usuario(&mut self, nombre: String, email: String) {
+        let usuario = Usuario { nombre, email };
+        self.usuario = Some(usuario);
     }
 
 
-    fn add_task(&mut self, description: String) {
-        let id = (self.tasks.len() + 1) as u32;
-        let task = Task {
+    fn añadir_tarea(&mut self, descripcion: String) {
+        let id = (self.tareas.len() + 1) as u32;
+        let tarea = Tarea {
             id,
-            description,
-            completed: false,
+            descripcion,
+            completada: false,
             date_time: Local::now(),
         };
-        self.tasks.push(task);
+        self.tareas.push(tarea);
         println!("Task added successfully!");
     }
 
-    fn complete_task(&mut self, task_id: u32) -> Result<(), String> {
-        if let Some(task) = self.tasks.iter_mut().find(|t| t.id == task_id) {
-            task.completed = true;
-            self.save_tasks_to_file();
+    fn completar_tarea(&mut self, id_tarea: u32) -> Result<(), String> {
+        if let Some(tarea) = self.tareas.iter_mut().find(|t| t.id == id_tarea) {
+            tarea.completada = true;
+            self.guardar_tareas_txt();
             Ok(())
         } else {
             Err("Task not found".to_string())
         }
     }
 
-    fn load_tasks_from_file(&mut self) {
+    fn cargar_tareas_txt(&mut self) {
         let file = match OpenOptions::new().read(true).open(&self.file_path) {
             Ok(file) => file,
             Err(_) => return, // No se puede abrir el archivo, no hay tareas para cargar
@@ -179,19 +180,19 @@ impl TaskList {
                             Err(_) => Local::now(),
                         };
 
-                        let task = Task {
+                        let tarea = Tarea {
                             id,
-                            description: task_parts[1].to_string(),
-                            completed,
+                            descripcion: task_parts[1].to_string(),
+                            completada: completed,
                             date_time,
                         };
-                        self.tasks.push(task);
+                        self.tareas.push(tarea);
                     }
                 }
             }
         }
     }
-    fn save_tasks_to_file(&self) {
+    fn guardar_tareas_txt(&self) {
         let mut file = OpenOptions::new()
             .write(true)
             .truncate(true)
@@ -199,35 +200,35 @@ impl TaskList {
             .open(&self.file_path)
             .unwrap();
 
-        for task in &self.tasks {
+        for tarea in &self.tareas {
             let task_str = format!(
                 "{};{};{};{}\n",
-                task.id,
-                task.description,
-                task.date_time.to_rfc3339(),
-                task.completed
+                tarea.id,
+                tarea.descripcion,
+                tarea.date_time.to_rfc3339(),
+                tarea.completada
             );
             file.write_all(task_str.as_bytes()).unwrap();
         }
     }
 
-    fn print_tasks(&self) {
+    fn mostrar_tareas(&self) {
         println!("Mis Tareas:");
-        for task in &self.tasks {
-            println!("ID: {}", task.id);
-            println!("Descripcion: {}", task.description);
-            println!("Completada: {}", task.completed);
-            println!("Fecha y hora: {}", task.date_time.to_rfc3339());
-            if let Some(user) = &self.user {
-                println!("Nombre usuario: {}", user.name);
+        for tarea in &self.tareas {
+            println!("ID: {}", tarea.id);
+            println!("Descripcion: {}", tarea.descripcion);
+            println!("Completada: {}", tarea.completada);
+            println!("Fecha y hora: {}", tarea.date_time.to_rfc3339());
+            if let Some(user) = &self.usuario {
+                println!("Nombre usuario: {}", user.nombre);
                 println!("email: {}", user.email);
             }
             println!("----------------------");
         }
     }
 
-    fn clear_tasks(&mut self) {
-        self.tasks.clear();
+    fn borrar_tareas(&mut self) {
+        self.tareas.clear();
         println!("Todas las tareas han sido eliminadas.");
     }
 }
