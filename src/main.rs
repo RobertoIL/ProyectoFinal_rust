@@ -149,8 +149,13 @@ impl ListaTarea {
             completada: false,
             date_time: Local::now(),
         };
+<<<<<<< HEAD
         self.tareas.push(tarea);
         println!("Task added successfully!");
+=======
+        self.tasks.push(task);
+        println!("Tarea añadidad correctamente!");
+>>>>>>> a0e65db89490a0b29d2a241748a393d1cbf41817
     }
 
     fn completar_tarea(&mut self, id_tarea: u32) -> Result<(), String> {
@@ -159,7 +164,7 @@ impl ListaTarea {
             self.guardar_tareas_txt();
             Ok(())
         } else {
-            Err("Task not found".to_string())
+            Err("Tarea no encontrada".to_string())
         }
     }
 
