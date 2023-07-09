@@ -149,13 +149,8 @@ impl ListaTarea {
             completada: false,
             date_time: Local::now(),
         };
-<<<<<<< HEAD
         self.tareas.push(tarea);
-        println!("Task added successfully!");
-=======
-        self.tasks.push(task);
-        println!("Tarea añadidad correctamente!");
->>>>>>> a0e65db89490a0b29d2a241748a393d1cbf41817
+        println!("Tarea añadida correctamente!");
     }
 
     fn completar_tarea(&mut self, id_tarea: u32) -> Result<(), String> {
