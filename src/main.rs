@@ -42,11 +42,11 @@ fn main() {
                             .expect("Error de lectura");
 
                         lisa_tareas.registrar_usuario(name.trim().to_string(), email.trim().to_string());
-                        println!("Usuario registrado exitosamente 👍:)");
+                        println!("Usuario registrado exitosamente :)");
                     }
                     2 => {
                         if lisa_tareas.usuario.is_none() {
-                            println!("Registrar usuario");
+                            println!("Registrar usuario primero...");
                             continue;
                         }
 
@@ -217,8 +217,16 @@ impl ListaTarea {
         for tarea in &self.tareas {
             println!("ID: {}", tarea.id);
             println!("Descripcion: {}", tarea.descripcion);
-            println!("Completada: {}", tarea.completada);
-            println!("Fecha y hora: {}", tarea.date_time.to_rfc3339());
+            if tarea.completada == false {
+                println!("Completada: {}", "[ ]");
+            }
+            if tarea.completada == true {
+                println!("Completada: {}", "[X]");
+            }
+            let date = tarea.date_time.date_naive();
+            let time = tarea.date_time.time().format("%H:%M");
+            println!("Fecha: {}", date.format("%d-%m-%Y"));
+            println!("Hora: {}", time);
             if let Some(user) = &self.usuario {
                 println!("Nombre usuario: {}", user.nombre);
                 println!("email: {}", user.email);
